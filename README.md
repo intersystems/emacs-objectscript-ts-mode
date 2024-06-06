@@ -1,7 +1,7 @@
 
 
 
-Major-mode for ObjectScript in EMACs
+MAJOR-mode for ObjectScript in EMACs
 -----------------------------------------
 This is a major-mode for editing .cls files in ObjectScript using treesitter.
 
