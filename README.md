@@ -53,7 +53,7 @@ This configuration will ensure that objectscript_udl-ts-mode is automatically ac
 # License
 
 This project provided as-is and is licensed under the MIT License.
-=======
+
 Major-mode for ObjectScript in EMACs
 -----------------------------------------
 This is a major-mode for editing .cls files in ObjectScript using treesitter.
