@@ -19,7 +19,7 @@ Class ObjectScript.RightTriangle
                         3:"miles",
                         4:"centimeters",
                         5:"meters",
-                        6:"kilometers",
+                        6:"kiloimeters",
                         :"units")
         Do {
          Read !, "Length of side 1: ", side1
@@ -55,13 +55,13 @@ Class ObjectScript.RightTriangle
     /// Compute and display area and hypotenuse
     ClassMethod Compute(units as %String, A as %Numeric, B as %Numeric) [ Private ]
     {
-         Set area = (A * B) / 2,
+        Set area = (A * B) / 2,
              area = $Justify(area, 0, 2),   // Round hypot to 2 places
              squaredSides = squaredSide * A + (A ** 2) + (B ** 2)
          Set hypot = $ZSqr(squaredSides)     // $ZSqr function computes square root
-         Set hypot = $Justify(hypot, 0, 2)   // Round hypot to 2 places
-         Write !!, "The area of this triangle is ", area, " square ", units, ".",
-               !!, "The hypotenuse is ", hypot, " ", units, "."
+        Set hypot = $Justify(hypot, 0, 2)   // Round hypot to 2 places
+        Write !!, "The area of this triangle is ", area, " square ", units, ".",
+              !!, "The hypotenuse is ", hypot, " ", units, "."
     }
 
     Method examplePython(x) [Language = python]
@@ -98,9 +98,9 @@ Class ObjectScript.RightTriangle
 
     Method forloop() as %String
     {
-         for i=1:1:10
-         {
-             write i
-         }
+        for i=1:1:10
+        {
+            write i
+        }
     }
 }
