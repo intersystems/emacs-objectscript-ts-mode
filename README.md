@@ -5,7 +5,7 @@ MAJOR-mode for ObjectScript in EMACs
 -----------------------------------------
 This is a major-mode for editing .cls files in ObjectScript using treesitter.
 
-#### Preliminaries
+# Preliminaries
 
 1.  **Emacs Version**: You will need Emacs version 29.1 or greater. This version should ship with tree-sitter, but you will need to install it if it is missing.
 
@@ -42,7 +42,7 @@ This is a major-mode for editing .cls files in ObjectScript using treesitter.
 
     This will compile and install the grammars, making them available to the tree-sitter parser.
 
-#### Installation
+# Installation
 
 Once the preliminary steps are complete, installing the major-mode file is straightforward.
 
@@ -52,7 +52,7 @@ Once the preliminary steps are complete, installing the major-mode file is strai
 
 2.  With the file in place, you can now open a relevant file and enable the major-mode by running `M-x objectscript_udl-ts-mode`.
 
-#### Default Configuration
+# Default Configuration
 
 To make this major-mode the default for all `.cls` files, add the following two lines to your `init.el` file:
 
@@ -62,6 +62,6 @@ To make this major-mode the default for all `.cls` files, add the following two 
 ```
 This configuration will ensure that objectscript_udl-ts-mode is automatically activated when you open a .cls file, overriding the default mode for LaTeX files which can also use the .cls extension.
 
-## License
+# License
 
 This project provided as-is and is licensed under the MIT License.
