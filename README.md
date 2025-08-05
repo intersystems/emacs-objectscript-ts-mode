@@ -62,4 +62,6 @@ To make this major-mode the default for all `.cls` files, add the following two 
 ```
 This configuration will ensure that objectscript_udl-ts-mode is automatically activated when you open a .cls file, overriding the default mode for LaTeX files which can also use the .cls extension.
 
+## License
 
+This project provided as-is and is licensed under the MIT License.
