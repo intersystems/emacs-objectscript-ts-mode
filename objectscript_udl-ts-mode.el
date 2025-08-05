@@ -1,19 +1,22 @@
-;;; objectscript_udl-ts-mode.el.gz --- Description -*- lexical-binding: t; -*-
+;;; objectscript-treesitter-major-mode --- A major-mode for editing ObjectScript -*- lexical-binding: t; -*-
 ;;
 ;; Copyright (C) 2024 Marc Johnson
 ;;
-;; Author: Marc Johnson <marjohns@USMBP16MARJOHNS>
-;; Maintainer: Marc Johnson <marjohns@USMBP16MARJOHNS>
+;; Author: Marc Johnson <marjohns@intersystems.com>
+;; Maintainer: Marc Johnson <marjohns@intersystems.com>
 ;; Created: May 03, 2024
-;; Modified: May 03, 2024
+;; Modified: August 04, 2025
 ;; Version: 0.0.1
-;; Keywords: abbrev bib c calendar comm convenience data docs emulations extensions faces files frames games hardware help hypermedia i18n internal languages lisp local maint mail matching mouse multimedia news outlines processes terminals tex tools unix vc wp
-;; Homepage: https://github.com/marjohns/objectscript_udl-ts-mode.el
+;; Keywords:  languages lisp tools objectscript
+;; Homepage: https://github.iscinternal.com/marjohns/objectscript-treesitter-major-mode
 ;; Package-Requires: ((emacs "29.1"))
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
 ;;; Commentary:
+;;; This is a major-mode for editing ObjectScript on Emacs.
+;;; It provides highlighting, indent rules, imenu features, and
+;;; You will need to install the language parsers (more instructions in the README.md)
 ;;
 ;;  Description
 ;;
@@ -22,10 +25,6 @@
 (require 'treesit)
 (require 'font-lock)
 (require 'python)
-;;TODO: Weird glitch found with javascript where you have to remove and reinsert
-;;TODO: or else it looks for libtree-sitter-js.dylib which doesn't exist. Reinserting
-;;TODO: makes it look for libtree-sitter-javascript.dylib which is the proper file.
-;;(require 'js)
 (require 'java-ts-mode)
 
 (defvar objectscript_udl-ts-range-rules
@@ -420,4 +419,4 @@
 (if (treesit-ready-p 'objectscript_udl)
     (add-to-list 'auto-mode-alist '("\\.cls\\'" . objectscript_udl-ts-mode)))
 (provide 'objectscript_udl-ts-mode)
-;;; objectscript_udl-ts-mode.el.gz ends here
+;;; objectscript-treesitter-major-mode ends here
