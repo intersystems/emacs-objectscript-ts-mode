@@ -2,7 +2,6 @@ MAJOR-mode for ObjectScript in EMACs
 -----------------------------------------
 This is a major-mode for editing .cls files in ObjectScript using treesitter.
 
-
 # Preliminaries
 
 1.  **Emacs Version**: You will need Emacs version 29.1 or greater. This version should ship with tree-sitter, but you will need to install it if it is missing.
