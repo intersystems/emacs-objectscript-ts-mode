@@ -5,8 +5,6 @@ MAJOR-mode for ObjectScript in EMACs
 -----------------------------------------
 This is a major-mode for editing .cls files in ObjectScript using treesitter.
 
-
-
 ---------------- Preliminary -------------------
 
 1. In order to run this major-mode, you will need EMACs with a version greater than 29.1.
@@ -32,10 +30,13 @@ you can simply run some elisp to get the library files into emacs.
 -------------- Install -------------------------
 
 
-Once you've installed the file it's fairly simple to get it to work.
+Once you've installed the grammar it's fairly simple to get the major-mode to work.
 You just need to put it where all you're major modes are.
 On Mac this should be in /Applications/Emacs.app/Content/Resources/lisp/progmodes/
 but this can differ on Windows or Linux.
+
+Alternatively, you can install the major mode via melpa. It is under
+objectscript-treesitter-major-mode. That'll install it to your packages directory for use. As long as its on your 'loadpath, it should find the major mode.
 
 This should be all that you need to run the major-mode. When you open your file you can now run M-x objectscript_udl-ts-mode to open up the major mode.
 
