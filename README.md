@@ -2,6 +2,7 @@ MAJOR-mode for ObjectScript in EMACs
 -----------------------------------------
 This is a major-mode for editing .cls files in ObjectScript using treesitter.
 
+
 # Preliminaries
 
 1.  **Emacs Version**: You will need Emacs version 29.1 or greater. This version should ship with tree-sitter, but you will need to install it if it is missing.
@@ -14,12 +15,11 @@ This is a major-mode for editing .cls files in ObjectScript using treesitter.
         **For `udl`:**
         ```lisp
         (add-to-list 'treesit-language-source-alist
-                     '(objectscript_udl . "(https://github.com/intersystems/objectscript-treesitter-major-mode.git)"
+                     '(objectscript_udl . "(https://github.com/intersystems/tree-sitter-objectscript.git)"
                                            "main" "udl/src")))
         ```
-        
-        
 You can also add the languages to the alist directly in your configuration file. This should compile the language into an el.gz file which EMACS uses for its progmodes.
+
 
 4.  **Additional Grammars**: If you plan to write embedded Python, Java, or JavaScript within `.cls` files and want syntax highlighting, you will also need their respective tree-sitter grammars. You can install these using the `treesit-install-language-grammar` command, as they are officially supported.
 
@@ -34,7 +34,7 @@ You can also add the languages to the alist directly in your configuration file.
 
 Once the preliminary steps are complete, installing the major-mode file is straightforward.
 
-1.  Place the `objectscript_udl-ts-mode.el` file in your Emacs `lisp/progmodes/` directory. You'll need the major mode from our repository here: https://github.com/intersystems/objectscript-tree-sitter-major-mode. The location of this directory can vary based on your operating system:
+1.  Place the `objectscript_udl-ts-mode.el` file in your Emacs `lisp/progmodes/` directory and append `.gz` to the end so EMACS can read it. (Note: MELPA support coming soon so this step will be unnecessary). You'll need the major mode from our repository here: https://github.com/intersystems/objectscript-treesitter-major-mode. The location of this directory can vary based on your operating system:
     * **macOS**: `/Applications/Emacs.app/Contents/Resources/lisp/progmodes/`
     * **Windows/Linux**: The path may differ.
 
