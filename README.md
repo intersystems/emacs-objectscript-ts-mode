@@ -47,6 +47,7 @@ To make this major-mode the default for all `.cls` files, add the following two 
 (autoload 'objectscript_udl-ts-mode "/Applications/Emacs.app/Contents/Resources/lisp/progmodes/objectscript_udl-ts-mode.el.gz" "A major mode for objectscript." t)
 (add-to-list 'auto-mode-alist '("\\.cls\\'" . objectscript_udl-ts-mode))
 ```
+
 This configuration will ensure that objectscript_udl-ts-mode is automatically activated when you open a .cls file, overriding the default mode for LaTeX files which can also use the .cls extension.
 
 # License
