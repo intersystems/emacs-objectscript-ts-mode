@@ -8,7 +8,7 @@
 ;; Modified: August 04, 2025
 ;; Version: 0.0.1
 ;; Keywords:  languages lisp tools objectscript
-;; Homepage: https://github.iscinternal.com/marjohns/objectscript-treesitter-major-mode
+;; Homepage: https://github.com/intersystems/emacs-objectscript-ts-mode.git
 ;; Package-Requires: ((emacs "29.1"))
 ;;
 ;; This file is not part of GNU Emacs.
