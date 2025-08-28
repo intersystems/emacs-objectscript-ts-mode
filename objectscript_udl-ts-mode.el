@@ -162,13 +162,14 @@
         @font-lock-keyword-face))
       (method_definition name: (identifier) @font-lock-function-name-face)
      ]
-     (instance_method_call (method_name) @font-lock-function-call-face)
-     [(method_name)
-      (user_defined_function)
-      (routine_method_call)
-      (tag)
-      (goto_label)
-      (goto_routine)] @font-lock-function-name-face
+     ;; (instance_method_call (method_name) @font-lock-function-call-face)
+     ;; [(method_name)
+     ;;  (user_defined_function)
+     ;;  (routine_method_call)
+     ;;  (tag)
+     ;;  (goto_label)
+     ;;  (goto_routine)] @font-lock-function-name-face
+      )
 
     ;; === Arguments ===
     :language objectscript_udl
@@ -176,6 +177,7 @@
     ([(argument (identifier) @font-lock-variable-name-face keyword: (keyword_as)
                 (typename (identifier) @font-lock-type-face))
       (argument (identifier) @font-lock-variable-name-face)])
+
 
     ;; === Keywords ===
     :language objectscript_udl
@@ -231,22 +233,29 @@
       (lvn)
       (property_name)
       (method_arg)
-      (instance_property (property_name))]
-     @font-lock-variable-name-face
-     [(pound_define macro_name: (pound_define_variable_name)
+      ;; (instance_property (property_name))
+      ]
+     @font-lock-variable-name-face)
+
+
+
+    ;; === Variables 2 ===
+    :language objectscript_udl
+    :feature variable
+     ([(pound_define macro_name: (pound_define_variable_name)
                     @font-lock-function-name-face)
       (pound_define_variable_args macro_arg: (macro_arg)
                                   @font-lock-variable-name-face)])
 
-    ;; === System-defined things ===
-    :language objectscript_udl
-    :feature system_defined
-    ([(routine_method_call)
-      (system_defined_function)
-      (system_defined_variable)
-      (macro_function (_))
-      (macro_constant)]
-     @font-lock-preprocessor-face)
+    ;; ;; === System-defined things ===
+    ;; :language objectscript_udl
+    ;; :feature system_defined
+    ;; ([(routine_method_call)
+    ;;   (system_defined_function)
+    ;;   (system_defined_variable)
+    ;;   (macro_function (_))
+    ;;   (macro_constant)]
+    ;;  @font-lock-preprocessor-face)
 
     ;; === Comments & Documentation ===
     :language objectscript_udl
@@ -264,12 +273,17 @@
     :feature literal
     :override t
     ([(string_literal)
-      (_read_prompt)
-      (json_string_literal)]
-     @font-lock-string-face
-    [(numeric_literal (integer_literal) @font-lock-number-face)
-      (json_number_literal)
-      (goto_offset)]
+      (_read_prompt)]
+     @font-lock-string-face)
+
+
+    ;; === Numbers ===
+    :language objectscript_udl
+    :feature literal
+    :override t
+    ([(integer_literal)
+      (decimal_literal)
+      ]
      @font-lock-number-face)
 
     ;; === Brackets & Delimiters ===
