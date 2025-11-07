@@ -27,10 +27,10 @@
 (require 'python)
 (require 'java-ts-mode)
 
-(defvar objectscript_udl-ts-range-rules
+(defvar objectscript-ts-range-rules
   '(
     :embed python
-    :host objectscript_udl
+    :host objectscript
     ((method_definition
       name: (_)
       arguments: (_)
@@ -40,7 +40,7 @@
       body: (external_method_body_content) @capture))
 
     :embed java
-    :host objectscript_udl
+    :host objectscript
     ((method_definition
       name: (_)
       arguments: (_)
@@ -50,7 +50,7 @@
       body: (external_method_body_content) @capture))
 
     :embed objectscript_core
-    :host objectscript_udl
+    :host objectscript
     ((method_definition
       name: (_)
       arguments: (_)
@@ -58,10 +58,10 @@
       body: (core_method_body_content) @capture))
     ))
 
-(defvar objectscript_udl-ts-font-lock-rules
+(defvar objectscript-ts-font-lock-rules
   '(
     ;; === Class Definitions ===
-    :language objectscript_udl
+    :language objectscript
     :feature class
     :override t
     ((class_definition
@@ -76,7 +76,7 @@
       class_body: (_)))
 
     ;; === Properties, Relationships, Indexes, etc. ===
-    :language objectscript_udl
+    :language objectscript
     :feature property
     :override t
     ((property
@@ -128,7 +128,7 @@
     )
 
     ;; === Methods & Classmethods ===
-    :language objectscript_udl
+    :language objectscript
     :feature method
     :override t
     ([
@@ -172,7 +172,7 @@
       )
 
     ;; === Arguments ===
-    :language objectscript_udl
+    :language objectscript
     :feature argument
     ([(argument (identifier) @font-lock-variable-name-face keyword: (keyword_as)
                 (typename (identifier) @font-lock-type-face))
@@ -180,7 +180,7 @@
 
 
     ;; === Keywords ===
-    :language objectscript_udl
+    :language objectscript
     :feature keyword
     :override t
     ([(keyword_class)
@@ -227,7 +227,7 @@
      @font-lock-keyword-face)
 
     ;; === Variables ===
-    :language objectscript_udl
+    :language objectscript
     :feature variable
     ([(glvn (gvn))
       (lvn)
@@ -240,7 +240,7 @@
 
 
     ;; === Variables 2 ===
-    :language objectscript_udl
+    :language objectscript
     :feature variable
      ([(pound_define macro_name: (pound_define_variable_name)
                     @font-lock-function-name-face)
@@ -248,7 +248,7 @@
                                   @font-lock-variable-name-face)])
 
     ;; ;; === System-defined things ===
-    ;; :language objectscript_udl
+    ;; :language objectscript
     ;; :feature system_defined
     ;; ([(routine_method_call)
     ;;   (system_defined_function)
@@ -258,7 +258,7 @@
     ;;  @font-lock-preprocessor-face)
 
     ;; === Comments & Documentation ===
-    :language objectscript_udl
+    :language objectscript
     :feature comment
     :override t
     ([(line_comment_1)
@@ -269,7 +269,7 @@
      (documatic_line) @font-lock-doc-face)
 
     ;; === Strings ===
-    :language objectscript_udl
+    :language objectscript
     :feature literal
     :override t
     ([(string_literal)
@@ -278,42 +278,40 @@
 
 
     ;; === Numbers ===
-    :language objectscript_udl
+    :language objectscript
     :feature literal
     :override t
-    ([(integer_literal)
-      (decimal_literal)
-      ]
+    ([(numeric-literal)]
      @font-lock-number-face)
 
     ;; === Brackets & Delimiters ===
-    :language objectscript_udl
+    :language objectscript
     :feature bracket
     :override t
     (["[" "]" "(" ")" "{" "}"] @font-lock-delimiter-face)
   ))
 
 
-(defun objectscript_udl-ts-imenu-property (node)
+(defun objectscript-ts-imenu-property (node)
   "Imenu boolean function for property using NODE."
   (equal (treesit-node-type node) "property"))
 
-(defun objectscript_udl-ts-imenu-parameter (node)
+(defun objectscript-ts-imenu-parameter (node)
   (equal (treesit-node-type node) "parameter"))
 
-(defun objectscript_udl-ts-imenu-property-name-function (node)
+(defun objectscript-ts-imenu-property-name-function (node)
     "Naming the imenu property nodes using NODE."
   (let ((name (treesit-node-text node)))
-    (if (objectscript_udl-ts-imenu-property node)
+    (if (objectscript-ts-imenu-property node)
         name
     name)))
 
-(defun objectscript_udl-ts-imenu-method (node)
+(defun objectscript-ts-imenu-method (node)
   "Imenu boolean function for methods using NODE."
   (or (equal (treesit-node-type node) "classmethod")
       (equal (treesit-node-type node) "method")))
 
-(defun objectscript_udl-ts-imenu-method-name-function (node)
+(defun objectscript-ts-imenu-method-name-function (node)
     "Naming the imenu method nodes using NODE."
     (let* ((method_definition (treesit-node-child node 1))
            (class_keyword (treesit-node-child node 0))
@@ -322,7 +320,7 @@
       (concat (treesit-node-text class_keyword) " " name)))
 
 
-(defun objectscript_udl-ts-imenu-parameter-name-function (node)
+(defun objectscript-ts-imenu-parameter-name-function (node)
   (treesit-node-text node))
 
 (defun objectscript_core-ts-imenu-variable (node)
@@ -331,8 +329,8 @@
 (defun objectscript_core-ts-imenu-variable-name-function (node)
   (treesit-node-text (treesit-node-child (treesit-node-child node 1) 0)))
 
-(defun objectscript_udl-ts-setup ()
-  "Setup treesit for objectscript_udl-ts-mode."
+(defun objectscript-ts-setup ()
+  "Setup treesit for objectscript-ts-mode."
 
  (setq-local treesit-font-lock-feature-list
               '((comment delimiter bracket definition)
@@ -342,23 +340,23 @@
 
  (setq-local treesit-range-settings
              (apply #'treesit-range-rules
-                     objectscript_udl-ts-range-rules))
+                     objectscript-ts-range-rules))
 
  (setq-local treesit-font-lock-settings
              (append python--treesit-settings
                      ;;js--treesit-font-lock-settings
                      java-ts-mode--font-lock-settings
-                     (apply #'treesit-font-lock-rules objectscript_udl-ts-font-lock-rules)))
+                     (apply #'treesit-font-lock-rules objectscript-ts-font-lock-rules)))
 
  ;; (setq-local treesit-font-lock-settings
  ;;             (apply #'treesit-font-lock-rules
- ;;                objectscript_udl-ts-font-lock-rules))
+ ;;                objectscript-ts-font-lock-rules))
  (setq-local treesit-font-lock-level 4)
 
  (setq-local treesit--indent-verbose t)
 
  (setq-local treesit-simple-indent-rules
-    '((objectscript_udl
+    '((objectscript
      ;; Rule 1
      ((parent-is "program") parent 0)
      ((node-is "property") parent 4)
@@ -412,25 +410,25 @@
      (no-node parent 0))))
 
   (setq-local treesit-simple-imenu-settings
-              '(("Properties" objectscript_udl-ts-imenu-property nil objectscript_udl-ts-imenu-property-name-function)
-                ("Methods" objectscript_udl-ts-imenu-method nil objectscript_udl-ts-imenu-method-name-function)
-                ("Parameters" objectscript_udl-ts-imenu-parameter nil objectscript_udl-ts-imenu-parameter-name-function)
+              '(("Properties" objectscript-ts-imenu-property nil objectscript-ts-imenu-property-name-function)
+                ("Methods" objectscript-ts-imenu-method nil objectscript-ts-imenu-method-name-function)
+                ("Parameters" objectscript-ts-imenu-parameter nil objectscript-ts-imenu-parameter-name-function)
                 ("Local Variables" objectscript_core-ts-imenu-variable nil objectscript_core-ts-imenu-variable-name-function)))
   (treesit-major-mode-setup))
 
-(define-derived-mode objectscript_udl-ts-mode prog-mode "objectscript_udl"
+(define-derived-mode objectscript-ts-mode prog-mode "objectscript"
   "Major mode for editing 'Objectscript, powered by tree-sitter."
-  (when (and (treesit-ready-p 'objectscript_udl)
+  (when (and (treesit-ready-p 'objectscript)
              (treesit-ready-p 'python)
       ;;       (treesit-ready-p 'javascript)
              (treesit-ready-p 'java))
     ;;(treesit-parser-create 'javascript)
     (treesit-parser-create 'java)
     (treesit-parser-create 'python)
-    (treesit-parser-create 'objectscript_udl)
-    (objectscript_udl-ts-setup)))
+    (treesit-parser-create 'objectscript)
+    (objectscript-ts-setup)))
 
-(if (treesit-ready-p 'objectscript_udl)
-    (add-to-list 'auto-mode-alist '("\\.cls\\'" . objectscript_udl-ts-mode)))
-(provide 'objectscript_udl-ts-mode)
+(if (treesit-ready-p 'objectscript)
+    (add-to-list 'auto-mode-alist '("\\.cls\\'" . objectscript-ts-mode)))
+(provide 'objectscript-ts-mode)
 ;;; objectscript-treesitter-major-mode ends here
