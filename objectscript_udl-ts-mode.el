@@ -281,7 +281,7 @@
     :language objectscript
     :feature literal
     :override t
-    ([(numeric-literal)]
+    ([(numeric_literal)]
      @font-lock-number-face)
 
     ;; === Brackets & Delimiters ===
@@ -348,66 +348,55 @@
                      java-ts-mode--font-lock-settings
                      (apply #'treesit-font-lock-rules objectscript-ts-font-lock-rules)))
 
- ;; (setq-local treesit-font-lock-settings
- ;;             (apply #'treesit-font-lock-rules
- ;;                objectscript-ts-font-lock-rules))
  (setq-local treesit-font-lock-level 4)
 
  (setq-local treesit--indent-verbose t)
 
- (setq-local treesit-simple-indent-rules
-    '((objectscript
-     ;; Rule 1
-     ((parent-is "program") parent 0)
-     ((node-is "property") parent 4)
-     ;; Rule 2
-     ((parent-is "class_definition") parent 0)
-     ;; Rule 3
-     ((node-is "{") grand-parent  0)
-     ((node-is "}") grand-parent  0)
-     ;; Rule 4
-     ((node-is "class_statement") parent 4)
-     ((parent-is "class_statement") first-sibling 0)
-     ((parent-is "documatic") first-sibling 0)
-     ((parent-is "arguments") first-sibling 0)
-     ;; Rule 5
-     ((node-is "core_method_body_content") grand-parent 4)
-     ((parent-is "core_method_body_content") parent 0)
-     ((parent-is "command_write") (nth-sibling 1) 0)
-     ((parent-is "command_read") (nth-sibling 1) 0)
-     ((parent-is "command_set") (nth-sibling 1) 0)
 
-     ((n-p-gp nil "program" "command_if") first-sibling 0)
-     ((n-p-gp "}" "command_if" nil) parent 0)
-     ((n-p-gp "}" "else_block" nil ) parent 0)
-     ((node-is "else_block") parent 0)
-     ((node-is "elseif_block") parent 0)
-     ((n-p-gp nil "program" "else_block") first-sibling 0)
-     ((parent-is "command_if") parent 4)
-     ((n-p-gp "expression" "command_if" nil) parent 2)
+ (defvar objectscript-ts-indent-rules
+  '((objectscript
+     ;; --- Class Definition ---
+     ((parent-is "class_body") parent-bol 4)
+     ((match "class_statement") parent-bol 4)
 
-     ((parent-is "command_dowhile") parent 4)
-     ((parent-is "statements") parent 0)
-     ((parent-is "else_block") parent 4)
-     ((parent-is "elseif_block") parent 4)
-     ((parent-is "binary_expression") first-sibling 0)
 
-     ((n-p-gp "}" "command_for" nil) parent 0)
-     ((n-p-gp "{" "command_for" nil ) parent 0)
-     ((n-p-gp nil "program" "command_for") first-sibling 0)
-     ((parent-is "command_for") parent 4)
+     ((parent-is "command_if") parent-bol 4)
+     ((parent-is "command_for") parent-bol 4)
+     ((parent-is "command_while") parent-bol 4)
+     ((parent-is "elseif_block") parent-bol 4)
+     ((parent-is "else_block") parent-bol 4)
 
-     ((n-p-gp nil "statements" "command_while") grand-parent 4)
-     ((n-p-gp "statements" "command_while" nil) parent 4)
+             ;; --- Old-style FOR / IF / ELSE ---
+     ((parent-is "command_for") parent-bol 4)
+     ((parent-is "command_if") parent-bol 4)
+     ((parent-is "command_else") parent-bol 4)
 
-     ((parent-is "system_defined_function") parent 4)
+     ((n-p-gp "core_method_body_content" "method_definition" nil) parent-bol 4)
+     ((parent-is "core_method_body_content") parent-bol 0)
 
-     ((parent-is "subscripts") (nth-sibling 1) 0)
-     ((parent-is "program") parent 4)
-     ((node-is "core_method_body_content") grand-parent 4)
-     ((parent-is "method_definition") grand-parent 4)
-     (no-node first-sibling 0)
-     (no-node parent 0))))
+
+     ;; --- Command arguments that may wrap across lines ---
+     ((node-is "write_argument") (nth-sibling 1) 0)
+     ((node-is "set_argument") (nth-sibling 1) 4)
+     ((node-is "do_parameter") (nth-sibling 1) 4)
+     ((node-is "kill_argument") (nth-sibling 1) 4)
+     ((node-is "command_lock_argument") (nth-sibling 1) 4)
+     ((node-is "read_argument") (nth-sibling 1) 4)
+     ((node-is "open_parameter") (nth-sibling 1) 4)
+     ((node-is "close_parameter") (nth-sibling 1) 4)
+     ((node-is "use_parameter") (nth-sibling 1) 4)
+
+     ;; --- Generic fallback for braces/parentheses spanning multiple lines ---
+     ((match "{" "}") parent-bol 4)
+     ((match "(" ")") parent-bol 4))
+
+    ;; For embedded core ObjectScript code blocks
+    (objectscript_core
+
+)))
+
+ (setq-local indent-line-function #'treesit-simple-indent-line)
+ (setq-local treesit-simple-indent-rules objectscript-ts-indent-rules)
 
   (setq-local treesit-simple-imenu-settings
               '(("Properties" objectscript-ts-imenu-property nil objectscript-ts-imenu-property-name-function)
@@ -419,10 +408,12 @@
 (define-derived-mode objectscript-ts-mode prog-mode "objectscript"
   "Major mode for editing 'Objectscript, powered by tree-sitter."
   (when (and (treesit-ready-p 'objectscript)
+             (treesit-ready-p 'objectscript_core)
              (treesit-ready-p 'python)
       ;;       (treesit-ready-p 'javascript)
              (treesit-ready-p 'java))
     ;;(treesit-parser-create 'javascript)
+    (treesit-parser-create 'objectscript_core)
     (treesit-parser-create 'java)
     (treesit-parser-create 'python)
     (treesit-parser-create 'objectscript)
