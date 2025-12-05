@@ -277,7 +277,7 @@
     :feature bracket
     :override t
     (["[" "]" "(" ")" "{" "}"] @font-lock-delimiter-face)
-  ))
+  )))
 
 
 (defun objectscript_udl-ts-imenu-property (node)
