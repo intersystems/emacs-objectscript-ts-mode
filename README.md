@@ -14,8 +14,10 @@ This is a major-mode for editing .cls files in ObjectScript using treesitter.
         **For `udl`:**
         ```lisp
         (add-to-list 'treesit-language-source-alist
-                     '(objectscript_udl "https://github.com/intersystems/tree-sitter-objectscript.git"
-                                        "main" "udl/src"))
+                     '(objectscript_udl
+                       "https://github.com/intersystems/tree-sitter-objectscript.git"
+                       "main"
+                       "udl/src"))
         ```
 You can also add the languages to the alist directly in your configuration file. This should compile the language into an el.gz file which EMACS uses for its progmodes.
 
@@ -44,8 +46,13 @@ Once the preliminary steps are complete, installing the major-mode file is strai
 To make this major-mode the default for all `.cls` files, add the following two lines to your `init.el` file:
 
 ```lisp
-(autoload 'objectscript_udl-ts-mode "/Applications/Emacs.app/Contents/Resources/lisp/progmodes/objectscript_udl-ts-mode.el.gz" "A major mode for objectscript." t)
-(add-to-list 'auto-mode-alist '("\\.cls\\'" . objectscript_udl-ts-mode))
+(autoload 'objectscript_udl-ts-mode
+    "/Applications/Emacs.app/Contents/Resources/lisp/progmodes/objectscript_udl-ts-mode.el.gz"
+  "A major mode for objectscript."
+  t)
+
+(add-to-list 'auto-mode-alist
+             '("\\.cls\\'" . objectscript_udl-ts-mode))
 ```
 
 This configuration will ensure that objectscript_udl-ts-mode is automatically activated when you open a .cls file, overriding the default mode for LaTeX files which can also use the .cls extension.
