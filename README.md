@@ -18,6 +18,16 @@ This is a major-mode for editing .cls files in ObjectScript using treesitter.
                        "https://github.com/intersystems/tree-sitter-objectscript.git"
                        "main"
                        "udl/src"))
+        (add-to-list 'treesit-language-source-alist
+                     '(objectscript_core
+                       "https://github.com/intersystems/tree-sitter-objectscript.git"
+                       "main"
+                       "core/src"))
+        (add-to-list 'treesit-language-source-alist
+                     '(objectscript_expr
+                       "https://github.com/intersystems/tree-sitter-objectscript.git"
+                       "main"
+                       "expr/src"))
         ```
 You can also add the languages to the alist directly in your configuration file. This should compile the language into an el.gz file which EMACS uses for its progmodes.
 
