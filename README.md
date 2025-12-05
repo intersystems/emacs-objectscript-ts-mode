@@ -14,8 +14,20 @@ This is a major-mode for editing .cls files in ObjectScript using treesitter.
         **For `udl`:**
         ```lisp
         (add-to-list 'treesit-language-source-alist
-                     '(objectscript_udl . "(https://github.com/intersystems/tree-sitter-objectscript.git)"
-                                           "main" "udl/src")))
+                     '(objectscript
+                       "https://github.com/intersystems/tree-sitter-objectscript.git"
+                       "main"
+                       "udl/src"))
+        (add-to-list 'treesit-language-source-alist
+                     '(objectscript_core
+                       "https://github.com/intersystems/tree-sitter-objectscript.git"
+                       "main"
+                       "core/src"))
+        (add-to-list 'treesit-language-source-alist
+                     '(objectscript_expr
+                       "https://github.com/intersystems/tree-sitter-objectscript.git"
+                       "main"
+                       "expr/src"))
         ```
 You can also add the languages to the alist directly in your configuration file. This should compile the language into an el.gz file which EMACS uses for its progmodes.
 
@@ -23,7 +35,7 @@ You can also add the languages to the alist directly in your configuration file.
 4.  **Additional Grammars**: If you plan to write embedded Python, Java, or JavaScript within `.cls` files and want syntax highlighting, you will also need their respective tree-sitter grammars. You can install these using the `treesit-install-language-grammar` command, as they are officially supported.
 
 5.  **Install Grammars**: After configuring the sources, run the command `M-x treesit-install-language-grammar` for each of the following grammars:
-    * `objectscript_udl`
+    * `objectscript`
     * `objectscript_core`
     * `objectscript_expr`
 
@@ -31,21 +43,23 @@ You can also add the languages to the alist directly in your configuration file.
 
 # Installation
 
-Once the preliminary steps are complete, installing the major-mode file is straightforward.
+Once the preliminary steps are complete, installing the major-mode file is straightforward using `use-package` in your `init.el`:
 
-1.  Place the `objectscript_udl-ts-mode.el` file in your Emacs `lisp/progmodes/` directory and append `.gz` to the end so EMACS can read it properly. (Note: MELPA support coming soon so this step will be unnecessary). The location of this directory can vary based on your setup:
-    * **macOS**: `/Applications/Emacs.app/Contents/Resources/lisp/progmodes/`
-    * **Windows/Linux**: The path may differ.
+```emacs-lisp
+(use-package objectscript_udl-ts-mode
+  :vc ( :url "https://github.com/intersystems/emacs-objectscript-ts-mode.git"
+        :rev "main"))
+```
 
-2.  With the file in place, you can now open a relevant file and enable the major-mode by running `M-x objectscript_udl-ts-mode`.
+With the file in place, you can now open a relevant file and enable the major-mode by running `M-x objectscript_udl-ts-mode`.
 
 # Default Configuration
 
-To make this major-mode the default for all `.cls` files, add the following two lines to your `init.el` file:
+To make this major-mode the default for all `.cls` files, add the following line to your `init.el` file:
 
 ```lisp
-(autoload 'objectscript_udl-ts-mode "/Applications/Emacs.app/Contents/Resources/lisp/progmodes/objectscript_udl-ts-mode.el.gz" "A major mode for objectscript." t)
-(add-to-list 'auto-mode-alist '("\\.cls\\'" . objectscript_udl-ts-mode))
+(add-to-list 'auto-mode-alist
+             '("\\.cls\\'" . objectscript_udl-ts-mode))
 ```
 
 This configuration will ensure that objectscript_udl-ts-mode is automatically activated when you open a .cls file, overriding the default mode for LaTeX files which can also use the .cls extension.
