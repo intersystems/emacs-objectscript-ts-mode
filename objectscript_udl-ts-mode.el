@@ -400,6 +400,7 @@
                 ("Local Variables" objectscript_core-ts-imenu-variable nil objectscript_core-ts-imenu-variable-name-function)))
   (treesit-major-mode-setup))
 
+;;;###autoload
 (define-derived-mode objectscript_udl-ts-mode prog-mode "objectscript_udl"
   "Major mode for editing 'Objectscript, powered by tree-sitter."
   (when (and (treesit-ready-p 'objectscript_udl)
