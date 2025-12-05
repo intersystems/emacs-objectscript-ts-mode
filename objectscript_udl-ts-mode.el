@@ -30,7 +30,7 @@
 (defvar objectscript_udl-ts-range-rules
   '(
     :embed python
-    :host objectscript_udl
+    :host objectscript
     ((method_definition
       name: (_)
       arguments: (_)
@@ -40,7 +40,7 @@
       body: (external_method_body_content) @capture))
 
     :embed java
-    :host objectscript_udl
+    :host objectscript
     ((method_definition
       name: (_)
       arguments: (_)
@@ -50,7 +50,7 @@
       body: (external_method_body_content) @capture))
 
     :embed objectscript_core
-    :host objectscript_udl
+    :host objectscript
     ((method_definition
       name: (_)
       arguments: (_)
@@ -60,7 +60,7 @@
 (defvar objectscript_udl-ts-font-lock-rules
   '(
     ;; === Class Definitions ===
-    :language objectscript_udl
+    :language objectscript
     :feature class
     :override t
     ((class_definition
@@ -75,7 +75,7 @@
       class_body: (_)))
 
     ;; === Properties, Relationships, Indexes, etc. ===
-    :language objectscript_udl
+    :language objectscript
     :feature property
     :override t
     ((property
@@ -126,7 +126,7 @@
       name: (identifier (identifier) @font-lock-variable-name-face)))
 
     ;; === Methods & Classmethods ===
-    :language objectscript_udl
+    :language objectscript
     :feature method
     :override t
     ([
@@ -170,14 +170,14 @@
      @font-lock-function-name-face
 
      ;; === Arguments ===
-     :language objectscript_udl
+     :language objectscript
      :feature argument
      ([(argument (identifier) @font-lock-variable-name-face keyword: (keyword_as)
                  (typename (identifier) @font-lock-type-face))
        (argument (identifier) @font-lock-variable-name-face)])
 
      ;; === Keywords ===
-     :language objectscript_udl
+     :language objectscript
      :feature keyword
      :override t
      ([(keyword_class)
@@ -224,7 +224,7 @@
       @font-lock-keyword-face)
 
      ;; === Variables ===
-     :language objectscript_udl
+     :language objectscript
      :feature variable
      ([(glvn (gvn))
        (lvn)
@@ -238,7 +238,7 @@
                                    @font-lock-variable-name-face)])
 
      ;; === System-defined things ===
-     :language objectscript_udl
+     :language objectscript
      :feature system_defined
      ([(routine_method_call)
        (system_defined_function)
@@ -248,7 +248,7 @@
       @font-lock-preprocessor-face)
 
      ;; === Comments & Documentation ===
-     :language objectscript_udl
+     :language objectscript
      :feature comment
      :override t
      ([(line_comment_1)
@@ -259,7 +259,7 @@
       (documatic_line) @font-lock-doc-face)
 
      ;; === Strings ===
-     :language objectscript_udl
+     :language objectscript
      :feature literal
      :override t
      ([(string_literal)
@@ -272,7 +272,7 @@
       @font-lock-number-face)
 
      ;; === Brackets & Delimiters ===
-     :language objectscript_udl
+     :language objectscript
      :feature bracket
      :override t
      (["[" "]" "(" ")" "{" "}"] @font-lock-delimiter-face))))
@@ -340,7 +340,7 @@
   (setq-local treesit--indent-verbose t)
 
   (setq-local treesit-simple-indent-rules
-              '((objectscript_udl
+              '((objectscript
                  ;; Rule 1
                  ((parent-is "program") parent 0)
                  ((node-is "property") parent 4)
@@ -413,7 +413,7 @@
     (treesit-parser-create 'objectscript_udl)
     (objectscript_udl-ts-setup)))
 
-(if (treesit-ready-p 'objectscript_udl)
+(if (treesit-ready-p 'objectscript)
     (add-to-list 'auto-mode-alist '("\\.cls\\'" . objectscript_udl-ts-mode)))
 
 (provide 'objectscript_udl-ts-mode)

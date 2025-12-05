@@ -14,7 +14,7 @@ This is a major-mode for editing .cls files in ObjectScript using treesitter.
         **For `udl`:**
         ```lisp
         (add-to-list 'treesit-language-source-alist
-                     '(objectscript_udl
+                     '(objectscript
                        "https://github.com/intersystems/tree-sitter-objectscript.git"
                        "main"
                        "udl/src"))
@@ -25,7 +25,7 @@ You can also add the languages to the alist directly in your configuration file.
 4.  **Additional Grammars**: If you plan to write embedded Python, Java, or JavaScript within `.cls` files and want syntax highlighting, you will also need their respective tree-sitter grammars. You can install these using the `treesit-install-language-grammar` command, as they are officially supported.
 
 5.  **Install Grammars**: After configuring the sources, run the command `M-x treesit-install-language-grammar` for each of the following grammars:
-    * `objectscript_udl`
+    * `objectscript`
     * `objectscript_core`
     * `objectscript_expr`
 
