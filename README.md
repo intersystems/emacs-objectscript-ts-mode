@@ -33,13 +33,15 @@ You can also add the languages to the alist directly in your configuration file.
 
 # Installation
 
-Once the preliminary steps are complete, installing the major-mode file is straightforward.
+Once the preliminary steps are complete, installing the major-mode file is straightforward using `use-package` in your `init.el`:
 
-1.  Place the `objectscript_udl-ts-mode.el` file in your Emacs `lisp/progmodes/` directory and append `.gz` to the end so EMACS can read it properly. (Note: MELPA support coming soon so this step will be unnecessary). The location of this directory can vary based on your setup:
-    * **macOS**: `/Applications/Emacs.app/Contents/Resources/lisp/progmodes/`
-    * **Windows/Linux**: The path may differ.
+```emacs-lisp
+(use-package objectscript_udl-ts-mode
+  :vc ( :url "https://github.com/intersystems/emacs-objectscript-ts-mode.git"
+        :rev "main"))
+```
 
-2.  With the file in place, you can now open a relevant file and enable the major-mode by running `M-x objectscript_udl-ts-mode`.
+With the file in place, you can now open a relevant file and enable the major-mode by running `M-x objectscript_udl-ts-mode`.
 
 # Default Configuration
 
