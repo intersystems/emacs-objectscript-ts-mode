@@ -116,49 +116,34 @@
      ;;  name: (identifier (identifier) @font-lock-variable-name-face))
     )
 
-    ;; ;; === Methods & Classmethods ===
-    ;; :language objectscript
-    ;; :feature method
-    ;; :override t
-    ;; ([
-    ;;   ;; Classmethod definitions
-    ;;   (classmethod keyword: (_) @font-lock-keyword-face
-    ;;    (method_definition
-    ;;     name: (identifier (identifier) @font-lock-function-name-face)
-    ;;     arguments: (_)))
+    ;; === Methods & Classmethods ===
+    :language objectscript
+    :feature method
+    :override t
+    ([
+      ;; Classmethod definitions
+      (classmethod keyword: (_) @font-lock-keyword-face
+       (method_definition
+        name: (identifier (identifier) @font-lock-function-name-face)
+        arguments: (_)))
 
-    ;;   (classmethod keyword: (_) @font-lock-keyword-face
-    ;;    (method_definition
-    ;;     name: (identifier (identifier) @font-lock-function-name-face)
-    ;;     arguments: (_)
-    ;;     keywords: (method_keywords
-    ;;                (_ name: (keyword_name)
-    ;;                   @font-lock-variable-name-face))
-    ;;     @font-lock-keyword-face))
-    ;;   ;; Regular methods
-    ;;   (method keyword: (_) @font-lock-keyword-face
-    ;;    (method_definition
-    ;;     name: (identifier (identifier) @font-lock-function-name-face)
-    ;;     arguments: (_)))
-
-    ;;   (method keyword: (_) @font-lock-keyword-face
-    ;;    (method_definition
-    ;;     name: (identifier (identifier) @font-lock-function-name-face)
-    ;;     arguments: (_)
-    ;;     keywords: (method_keywords
-    ;;                (_ name: (keyword_name)
-    ;;                   @font-lock-variable-name-face))
-    ;;     @font-lock-keyword-face))
-    ;;   (method_definition name: (identifier) @font-lock-function-name-face)
-    ;;  ]
-    ;;  ;; (instance_method_call (method_name) @font-lock-function-call-face)
-    ;;  ;; [(method_name)
-    ;;  ;;  (user_defined_function)
-    ;;  ;;  (routine_method_call)
-    ;;  ;;  (tag)
-    ;;  ;;  (goto_label)
-    ;;  ;;  (goto_routine)] @font-lock-function-name-face
-    ;;   )
+      (method keyword: (_) @font-lock-keyword-face
+       (method_definition
+        name: (identifier (identifier) @font-lock-function-name-face)
+        arguments: (_)
+        keywords: (external_method_keywords
+                   (_) @font-lock-keyword-face)
+        @font-lock-keyword-face))
+      (method_definition name: (identifier (_)) @font-lock-function-name-face)
+     ]
+     ;; (instance_method_call (method_name) @font-lock-function-call-face)
+     ;; [(method_name)
+     ;;  (user_defined_function)
+     ;;  (routine_method_call)
+     ;;  (tag)
+     ;;  (goto_label)
+     ;;  (goto_routine)] @font-lock-function-name-face
+      )
 
     :language objectscript
     :feature argument
