@@ -17,229 +17,107 @@
 ;;; This is a major-mode for editing ObjectScript on Emacs.
 ;;; It provides highlighting, indent rules, imenu features, and
 ;;; You will need to install the language parsers (more instructions in the README.md)
-;;
+;;i
 ;;  Description
 ;;
 ;;; Code:
 
 (require 'treesit)
-(require 'font-lock)
 (require 'python)
-(require 'java-ts-mode)
+(require 'font-lock)
+
 
 (defvar objectscript-ts-range-rules
   '(
     :embed python
-    :host objectscript
+    :host objectscript_udl
     ((method_definition
-      keywords: (external_method_keywords
-                 (method_keyword_language
-                  (identifier)
-                  (rhs) @lang
-                  (:equal @lang "python")))
-      body: (external_method_body_content) @capture))
-
-    :embed objectscript_core
-    :host objectscript
-    ((method_definition
-      name: (_)
-      arguments: (_)
-      keywords: (_)
-      body: (core_method_body_content) @capture))
-    ))
+      ;; 1. Check if the language keyword is Python (case-insensitive)
+      (method_keyword_external_language
+       "="
+       (typename) @lang
+       (:equal @lang "python"))
+      ;; 2. If it is, capture the body content as @python
+      (external_method_body_content) @python))
+))
 
 (defvar objectscript-ts-font-lock-rules
   '(
     ;; === Class Definitions ===
-    :language objectscript
+    :language objectscript_udl
     :feature class
     :override t
     ((class_definition
-      keyword: (keyword_class) @font-lock-keyword-face
-      class_name: (identifier) @font-lock-function-name-face
-      class_body: (_))
-     (class_definition
-      keyword: (keyword_class) @font-lock-keyword-face
-      class_name: (identifier) @font-lock-function-name-face
-      (class_extends keyword: (keyword_extends)
-                     (identifier) @font-lock-type-face)
-      class_body: (_)))
+       (keyword_class) @font-lock-keyword-face
+       (class_name (identifier) @font-lock-type-face)))
 
-    ;; === Properties, Relationships, Indexes, etc. ===
-    :language objectscript
-    :feature property
+    :language objectscript_udl
+    :feature macro
     :override t
-    ((property
-      keyword: (keyword_property) @font-lock-keyword-face
-      name: (identifier (identifier) @font-lock-variable-name-face)
-      (property_type (keyword_as)
-                     (typename (identifier) @font-lock-type-face)))
-
-     (relationship
-      keyword: (keyword_relationship) @font-lock-keyword-face
-      name: (identifier (identifier) @font-lock-variable-name-face)
-      keyword: (keyword_as) @font-lock-keyword-face
-      (typename (_) @font-lock-type-face)
-      (relationship_keywords (_))*)
-
-     (foreignkey
-      keyword: (keyword_foreignkey) @font-lock-keyword-face
-      name: (identifier (identifier) @font-lock-variable-name-face)
-      (identifier (identifier) @font-lock-variable-name-face)+
-      keyword: (keyword_references) @font-lock-keyword-face
-      (identifier (identifier) @font-lock-variable-name-face)
-      (foreignkey_keywords (_))*)
-
-     [(foreignkey (identifier) @font-lock-variable-name-face)
-      (foreignkey (foreignkey_keywords) @font-lock-keyword-face)]
-
-     ;; [(kw_Cardinality name: (keyword_name))
-     ;;  (kw_Inverse name: (keyword_name)
-     ;;              rhs: (identifier) @font-lock-variable-name-face)]
-     ;; @font-lock-preprocessor-face
-
-     [(typename (identifier))
-      (class_name)
-      (locktype)]
-     @font-lock-type-face
-
-     ;; Index variations
-     [(index keyword: (keyword_index) @font-lock-keyword-face
-             name: (identifier (identifier) @font-lock-variable-name-face))
-      (index keyword: (keyword_index) @font-lock-keyword-face
-             name: (identifier (identifier) @font-lock-variable-name-face)
-             keyword: (keyword_on) @font-lock-keyword-face
-             (index_properties (_) @font-lock-variable-name-face)*)]
-
-     ;; (parameter
-     ;;  keyword: (keyword_parameter) @font-lock-keyword-face
-     ;;  name: (identifier (identifier) @font-lock-variable-name-face))
-    )
-
-    ;; === Methods & Classmethods ===
-    :language objectscript
-    :feature method
-    :override t
-    ([
-      ;; Classmethod definitions
-      (classmethod keyword: (_) @font-lock-keyword-face
-       (method_definition
-        name: (identifier (identifier) @font-lock-function-name-face)
-        arguments: (_)))
-
-      (method keyword: (_) @font-lock-keyword-face
-       (method_definition
-        name: (identifier (identifier) @font-lock-function-name-face)
-        arguments: (_)
-        keywords: (external_method_keywords
-                   (_) @font-lock-keyword-face)
-        @font-lock-keyword-face))
-      (method_definition name: (identifier (_)) @font-lock-function-name-face)
-     ]
-     ;; (instance_method_call (method_name) @font-lock-function-call-face)
-     ;; [(method_name)
-     ;;  (user_defined_function)
-     ;;  (routine_method_call)
-     ;;  (tag)
-     ;;  (goto_label)
-     ;;  (goto_routine)] @font-lock-function-name-face
-      )
-
-    :language objectscript
-    :feature argument
-    :override t
-    ([(argument (identifier) @font-lock-variable-name-face
-                (argument_type keyword: (keyword_as) @font-lock-keyword-face
-                                (typename (_) @font-lock-type-face)))
-      (argument keyword: (keyword_byref) @font-lock-keyword-face (identifier) @font-lock-variable-name-face
-                (argument_type keyword: (keyword_as) @font-lock-keyword-face
-                                (typename (_) @font-lock-type-face)))
-      (argument (identifier) @font-lock-variable-name-face)
-      (argument keyword: (keyword_byref) @font-lock-keyword-face (identifier) @font-lock-variable-name-face)])
-
-    ;; === Keywords ===
-    :language objectscript
-    :feature keyword
-    :override t
-    ([(keyword_class)
-      (keyword_index)
-      (keyword_relationship)
-      (keyword_foreignkey)
-      (keyword_references)
-      (keyword_classmethod)
-      (keyword_property)
-      (keyword_parameter)
-      (keyword_method)
-      (keyword_query)
-      (keyword_xdata)
-      (keyword_include)
-      (keyword_byref)
-      (keyword_includegenerator)
-      (keyword_trigger)
-      (keyword_as)
-      (keyword_catch)
-      (keyword_try)
-      (keyword_of)
-      (keyword_merge)
-      (keyword_pound_pound_class)
-      (keyword_extends)]
-     @font-lock-keyword-face
-     [(keyword_set)
-      (keyword_write)
-      (keyword_read)
-      (keyword_do)
-      (keyword_while)
-      (keyword_kill)
-      (keyword_open)
-      (keyword_if)
-      (keyword_else)
-      (keyword_elseif)
-      (keyword_oldelse)
-      (keyword_tstart)
-      (keyword_for)
-      (keyword_pound_define)
-      (keyword_return)
-      (keyword_quit)
-      (keyword_new)
-      (keyword_throw)
-      (keyword_break)
-      (keyword_tcommit)]
-     @font-lock-keyword-face
-        [(keyword_array)] @font-lock-type-face)
-
-    ;; === Variables ===
-    :language objectscript
-    :feature variable
-    ([(glvn (gvn))
-      (lvn)
-      (property_name (identifier_segment_immediate) @font-lock-variable-name-face)
-      (method_arg)
-      ;; (instance_property (property_name))
+    ([(macro (macro_constant) @font-lock-preprocessor-face)
+      (system_defined_function) @font-lock-preprocessor-face
+      (system_defined_variable) @font-lock-preprocessor-face
+      (extrinsic_function (line_ref (objectscript_identifier) @font-lock-preprocessor-face
+                                    (routine_ref (routine_name) @font-lock-variable-name-face)))
+      (tag_statement (tag) @font-lock-preprocessor-face)
       ]
-     @font-lock-variable-name-face)
+     )
 
 
-
-    ;; === Variables 2 ===
-    :language objectscript
-    :feature variable
-     ([(pound_define macro_name: (pound_define_variable_name)
-                    @font-lock-function-name-face)
-      (pound_define_variable_args macro_arg: (macro_arg)
-                                  @font-lock-variable-name-face)])
-
-    ;; ;; === System-defined things ===
-    ;; :language objectscript
-    ;; :feature system_defined
-    ;; ([(routine_method_call)
-    ;;   (system_defined_function)
-    ;;   (system_defined_variable)
-    ;;   (macro_function (_))
-    ;;   (macro_constant)]
-    ;;  @font-lock-preprocessor-face)
+    :language objectscript_udl
+    :feature class
+    :override t
+    ((parameter (keyword_parameter) @font-lock-keyword-face
+                (parameter_name (identifier) @font-lock-property-name-face))
+     (property (keyword_property)
+               (property_name (identifier) @font-lock-property-name-face)
+               (return_type (keyword_as)
+                            (typename) @font-lock-type-face))
+     (index (keyword_index)
+            (index_name (identifier) @font-lock-variable-name-face)
+            (keyword_on)
+            (index_item (index_property (column_name (identifier) @font-lock-property-name-face))))
+     (relationship (keyword_relationship)
+                   (relationship_name (identifier) @font-lock-property-name-face)
+                   (return_type (keyword_as) (typename) @font-lock-type-face)
+                   (relationship_keywords
+                    (relationship_keyword "=" @font-lock-operator-face
+                                          [
+                                           (typename) @font-lock-type-face
+                                           (variable_datatype (objectscript_identifier)
+                                                              @font-lock-type-face)
+                                           ]) @font-lock-preprocessor-face )  )
+     (foreignkey (keyword_foreignkey)
+                 (foreignkey_name (identifier) @font-lock-property-name-face)
+                 (property_name) @font-lock-property-name-face
+                 (property_name) @font-lock-property-name-face
+                 (keyword_references)
+                 (class_name) @font-lock-type-face
+                 (index_name) @font-lock-property-name-face)
+     (foreignkey (foreignkey_keywords
+                  (foreignkey_keyword "=" @font-lock-operator-face
+                   [(typename) @font-lock-type-face]) @font-lock-preprocessor-face))
+     (classmethod
+      (keyword_classmethod) @font-lock-keyword-face
+      (method_definition
+       (method_name (identifier) @font-lock-function-name-face)))
+     (method
+      (keyword_method) @font-lock-keyword-face
+      (method_definition
+       (method_name (identifier) @font-lock-function-name-face)))
+     (method_keyword_external_language) @font-lock-preprocessor-face
+     (return_type
+      (keyword_as) @font-lock-keyword-face
+      (typename (identifier) @font-lock-type-face))
+     (argument
+      [
+       (keyword_byref) @font-lock-keyword-face
+       (keyword_output) @font-lock-keyword-face
+      ])
+     )
 
     ;; === Comments & Documentation ===
-    :language objectscript
+    :language objectscript_udl
     :feature comment
     :override t
     ([(line_comment_1)
@@ -250,112 +128,143 @@
      (documatic_line) @font-lock-doc-face)
 
     ;; === Strings ===
-    :language objectscript
+    :language objectscript_udl
     :feature literal
     :override t
-    ([(string_literal)
-      (_read_prompt)]
-     @font-lock-string-face)
+    ((string_literal) @font-lock-string-face)
+
 
     ;; === Numbers ===
-    :language objectscript
+    :language objectscript_udl
     :feature literal
     :override t
-    ([(numeric_literal)]
+    ((numeric_literal)
      @font-lock-number-face)
 
+    ;; === Variables ====
+    :language objectscript_udl
+    :feature variable
+    :override t
+    ([(gvn (identifier) @font-lock-variable-name-face)
+      (lvn (objectscript_identifier) @font-lock-variable-name-face)
+      (oref_property (property_name (objectscript_identifier)
+                                    @font-lock-variable-name-face))
+      (instance_variable (property_name (objectscript_identifier) @font-lock-variable-name-face))
+      (class_name) @font-lock-type-face
+      (parameter_name (objectscript_identifier) @font-lock-property-use-face)
+      ])
+
     ;; === Brackets & Delimiters ===
-    :language objectscript
+    :language objectscript_udl
     :feature bracket
     :override t
     (["[" "]" "(" ")" "{" "}"] @font-lock-delimiter-face)
-  ))
+
+    :language objectscript_udl
+    :feature keyword
+    :override t
+    ([(keyword_pound_pound_class)
+      (keyword_set)
+      (keyword_write)
+      (keyword_read)
+      (keyword_do)
+      (keyword_kill)
+      (keyword_while)
+      (keyword_for)
+      (keyword_open)
+      (keyword_if)
+      (keyword_else)
+      (keyword_elseif)
+      (keyword_oldelse)
+      (keyword_tstart)
+      (keyword_tcommit)
+      (keyword_pound_define)
+      (keyword_return)
+      (keyword_quit)
+      (keyword_new)
+      (keyword_try)
+      (keyword_catch)
+      (keyword_throw)
+      (keyword_break)
+      (keyword_merge)
+      (keyword_as)
+      (keyword_of)
+      (keyword_class)
+      (keyword_index)
+      (keyword_relationship)
+      (keyword_foreignkey)
+      (keyword_references)
+      (keyword_classmethod)
+      (keyword_property)
+      (keyword_parameter)
+      (keyword_method)
+      (keyword_query)
+      (keyword_xdata)
+      (keyword_storage)
+      (keyword_projection)
+      (keyword_extends)
+      (keyword_not)
+      (keyword_byref)
+      (keyword_list)
+      (keyword_output)
+      (keyword_include)
+      (keyword_on)
+      ] @font-lock-keyword-face )
 
 
-(defun objectscript-ts-imenu-property (node)
-  "Imenu boolean function for property using NODE."
-  (equal (treesit-node-type node) "property"))
-
-(defun objectscript-ts-imenu-parameter (node)
-  (equal (treesit-node-type node) "parameter"))
-
-(defun objectscript-ts-imenu-property-name-function (node)
-    "Naming the imenu property nodes using NODE."
-  (let ((name (treesit-node-text node)))
-    (if (objectscript-ts-imenu-property node)
-        name
-    name)))
-
-(defun objectscript-ts-imenu-method (node)
-  "Imenu boolean function for methods using NODE."
-  (or (equal (treesit-node-type node) "classmethod")
-      (equal (treesit-node-type node) "method")))
-
-(defun objectscript-ts-imenu-method-name-function (node)
-    "Naming the imenu method nodes using NODE."
-    (let* ((method_definition (treesit-node-child node 1))
-           (class_keyword (treesit-node-child node 0))
-           (identifier (treesit-node-child method_definition 0))
-           (name (treesit-node-text identifier)))
-      (concat (treesit-node-text class_keyword) " " name)))
+    :language objectscript_udl
+    :feature method
+    :override t
+    ([(class_method_call (class_ref)
+                         (method_name (objectscript_identifier_special) @font-lock-preprocessor-face)
+                         (method_args))
+      (oref_method (method_name (objectscript_identifier) @font-lock-function-call-face)
+                   (method_args))])
 
 
-(defun objectscript-ts-imenu-parameter-name-function (node)
-  (treesit-node-text node))
-
-(defun objectscript_core-ts-imenu-variable (node)
-  (equal (treesit-node-type node) "command_set"))
-
-(defun objectscript_core-ts-imenu-variable-name-function (node)
-  (treesit-node-text (treesit-node-child (treesit-node-child node 1) 0)))
-
-(defun objectscript-ts-setup ()
-  "Setup treesit for objectscript-ts-mode."
-
- (setq-local treesit-font-lock-feature-list
-              '((comment delimiter bracket definition)
-                (class method constant system_defined function
-                 variable literal keyword property argument)
-                ))
-
- (setq-local treesit-range-settings
-             (apply #'treesit-range-rules
-                     objectscript-ts-range-rules))
-
- (setq-local treesit-font-lock-settings
-             (append python--treesit-settings
-                     ;;js--treesit-font-lock-settings
-                     java-ts-mode--font-lock-settings
-                     (apply #'treesit-font-lock-rules objectscript-ts-font-lock-rules)))
-
- (setq-local treesit-font-lock-level 4)
-
- (setq-local treesit--indent-verbose t)
+    :language objectscript_udl
+    :feature delimiter
+    :override t
+    (["," "."] @font-lock-delimiter-face)
+    )
+)
 
 
- (defvar objectscript-ts-indent-rules
-  '((objectscript
-     ;; --- Class Definition ---
+(defun objectscript-ts-parent-has-braces-p (_node parent _bol &rest _)
+  "Return t if the PARENT node contains a '{' as a direct child."
+  (let ((found nil))
+    (when parent
+      ;; Loop through all immediate children of the parent
+      (dotimes (i (treesit-node-child-count parent))
+        (when (equal (treesit-node-type (treesit-node-child parent i)) "{")
+          (setq found t))))
+    found))
+
+(defun objectscript-ts-is-tag-line-p (node _parent _bol &rest _)
+  "Return t if the line is a tag, even if Emacs passes the parent statement node."
+  (let ((type (treesit-node-type node)))
+    (or
+     ;; Case 1: Emacs successfully passes the tag_statement
+     (equal type "tag_statement")
+     (equal type "tag")
+     ;; Case 2: Emacs passes the parent statement, so we check its first child
+     (and (equal type "statement")
+          (equal (treesit-node-type (treesit-node-child node 0)) "tag_statement")))))
+
+(defvar objectscript-ts-indent-rules
+  '((objectscript_udl
+     ;; Comments should indent to match their parent
+     ;; Closing braces align with their opening construct
+     (objectscript-ts-is-tag-line-p (lambda (&rest _) (point-min)) 0)
+     ((node-is "}") parent-bol 0)
+     ;; Content inside class body should be indented
      ((parent-is "class_body") parent-bol 4)
-     ((match "class_statement") parent-bol 4)
+     ;; Method definition content (fix typo: was "method_defintion")
+     ((parent-is "method_definition") parent-bol 4)
+     (objectscript-ts-parent-has-braces-p parent-bol 4)
+     ;; Class statements (like Parameter, Property, etc.) inside class_body
+     ((node-is "class_statement") parent-bol 4)
 
-
-     ((parent-is "command_if") parent-bol 4)
-     ((parent-is "command_for") parent-bol 4)
-     ((parent-is "command_while") parent-bol 4)
-     ((parent-is "elseif_block") parent-bol 4)
-     ((parent-is "else_block") parent-bol 4)
-
-             ;; --- Old-style FOR / IF / ELSE ---
-     ((parent-is "command_for") parent-bol 4)
-     ((parent-is "command_if") parent-bol 4)
-     ((parent-is "command_else") parent-bol 4)
-
-     ((n-p-gp "core_method_body_content" "method_definition" nil) parent-bol 4)
-     ((parent-is "core_method_body_content") parent-bol 0)
-
-
-     ;; --- Command arguments that may wrap across lines ---
      ((node-is "write_argument") (nth-sibling 1) 0)
      ((node-is "set_argument") (nth-sibling 1) 4)
      ((node-is "do_parameter") (nth-sibling 1) 4)
@@ -366,40 +275,67 @@
      ((node-is "close_parameter") (nth-sibling 1) 4)
      ((node-is "use_parameter") (nth-sibling 1) 4)
 
-     ;; --- Generic fallback for braces/parentheses spanning multiple lines ---
-     ((match "{" "}") parent-bol 4)
-     ((match "(" ")") parent-bol 4))
 
-    ;; For embedded core ObjectScript code blocks
-    (objectscript_core
+     ;; Top level constructs align with beginning of line
+     ((parent-is "class_definition") parent-bol 0)
+     ((parent-is "program") parent-bol 0)
+     ;; Default fallback
+     ((node-is ".*") parent-bol 0)
+     (no-node parent-bol 0))))
 
-)))
+(defun objectscript-ts-setup ()
+  "Setup treesit for objectscript-ts-mode"
+  
+  (message "Starting objectscript-ts-setup...")
+  
+  ;; Check if we have parsers
+  (message "Available parsers: %s" (treesit-parser-list))
 
- (setq-local indent-line-function #'treesit-simple-indent-line)
- (setq-local treesit-simple-indent-rules objectscript-ts-indent-rules)
+ (setq-local treesit-range-settings
+             (apply #'treesit-range-rules
+                     objectscript-ts-range-rules))
+  
+  ;; Set font-lock feature list
+  (setq-local treesit-font-lock-feature-list
+              '((comment class keyword literal bracket variable method macro delimiter)))
+  (message "Set font-lock feature list: %s" treesit-font-lock-feature-list)
 
-  (setq-local treesit-simple-imenu-settings
-              '(("Properties" objectscript-ts-imenu-property nil objectscript-ts-imenu-property-name-function)
-                ("Methods" objectscript-ts-imenu-method nil objectscript-ts-imenu-method-name-function)
-                ("Parameters" objectscript-ts-imenu-parameter nil objectscript-ts-imenu-parameter-name-function)
-                ("Local Variables" objectscript_core-ts-imenu-variable nil objectscript_core-ts-imenu-variable-name-function)))
-  (treesit-major-mode-setup))
+
+  (setq-local treesit-font-lock-settings
+              (append python--treesit-settings
+              (apply #'treesit-font-lock-rules objectscript-ts-font-lock-rules)))
+
+
+  (setq-local treesit--indent-verbose t)
+
+  ;;(setq-local indent-line-function #'treesit-simple-indent-line)
+  (setq-local treesit-simple-indent-rules (append objectscript-ts-indent-rules))
+  ;; Setup treesit mode
+  (treesit-major-mode-setup)
+  )
+
 
 (define-derived-mode objectscript-ts-mode prog-mode "objectscript"
-  "Major mode for editing 'Objectscript, powered by tree-sitter."
-  (when (and (treesit-ready-p 'objectscript)
-             (treesit-ready-p 'objectscript_core)
-             (treesit-ready-p 'python)
-      ;;       (treesit-ready-p 'javascript)
-             (treesit-ready-p 'java))
-    ;;(treesit-parser-create 'javascript)
-    (treesit-parser-create 'objectscript_core)
-    (treesit-parser-create 'java)
-    (treesit-parser-create 'python)
-    (treesit-parser-create 'objectscript)
-    (objectscript-ts-setup)))
+  "Major mode for editing ObjectScript, powered by tree-sitter"
+  (let ((parser-name (if (string-match-p "\\.cls\\'" buffer-file-name)
+                         'objectscript_udl
+                       'objectscript_routine)))
+  (message "Checking treesitter availability...")
+  (message "objectscript_udl ready: %s" (treesit-ready-p parser-name))
 
-(if (treesit-ready-p 'objectscript)
-    (add-to-list 'auto-mode-alist '("\\.cls\\'" . objectscript-ts-mode)))
+  (if (treesit-ready-p parser-name)
+      (progn
+        (message "Creating objectscript_udl parser...")
+        (treesit-parser-create 'python)
+        (treesit-parser-create parser-name)
+        (message "Running setup...")
+        (objectscript-ts-setup)
+        (message "Setup complete!"))
+    (message "objectscript_udl parser not available!"))))
+
+(if (treesit-ready-p 'objectscript_udl)
+    (add-to-list 'auto-mode-alist '("\\.cls\\'" . objectscript-ts-mode))
+  (add-to-list 'auto-mode-alist '("\\.\\(mac\\|int\\|inc\\)\\'" . objectscript-ts-mode))
+)
 (provide 'objectscript-ts-mode)
-;;; objectscript-treesitter-major-mode ends here
+;; objectscript-treesitter-major-mode ends here
