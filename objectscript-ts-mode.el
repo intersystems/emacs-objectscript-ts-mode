@@ -28,18 +28,35 @@
 
 
 (defvar objectscript-ts-range-rules
-  '(
-    :embed python
-    :host objectscript_udl
-    ((method_definition
-      ;; 1. Check if the language keyword is Python (case-insensitive)
-      (method_keyword_external_language
-       "="
-       (typename) @lang
-       (:equal @lang "python"))
-      ;; 2. If it is, capture the body content as @python
-      (external_method_body_content) @capture))
-    ))
+ '(
+    ;; :embed python
+    ;; :host objectscript_udl
+    ;; ((method_definition
+    ;;   ;; 1. Check if the language keyword is Python (case-insensitive)
+    ;;   (method_keyword_external_language
+    ;;    "="
+    ;;    (typename))
+    ;;   ;; 2. If it is, capture the body content as @python
+    ;;   (external_method_body_content) @python))
+)
+)
+
+
+
+(defvar objectscript-routine-ts-font-lock-rules
+'(
+        :language objectscript_routine
+        :feature routine
+        :override t
+        ((routine_definition (routine) @font-lock-keyword-face (routine_name) @font-lock-type-face))
+
+        :language objectscript_routine
+        :feature method
+        :override t
+        ((routine_tag_call (method_name [(objectscript_identifier) @font-lock-function-call-face
+                                         (objectscript_identifier_special) @font-lock-preprocessor-face])))
+)
+)
 
 (defvar objectscript-udl-ts-font-lock-rules
     '(  ;; === Class Definitions ===
@@ -108,7 +125,6 @@
 
 (defun objectscript-shared-ts-font-lock-rules (lang)
   (treesit-font-lock-rules
-
     :language lang
     :feature 'macro
     :override t
@@ -116,7 +132,8 @@
       (system_defined_function) @font-lock-preprocessor-face
       (system_defined_variable) @font-lock-preprocessor-face
       (extrinsic_function (line_ref (objectscript_identifier) @font-lock-preprocessor-face
-                                    (routine_ref (routine_name) @font-lock-variable-name-face)))]
+                                    (routine_ref (routine_name) @font-lock-variable-name-face)))
+      (tag_statement (tag) @font-lock-preprocessor-face)]
      )
     ;; === Comments & Documentation ===
     :language lang
@@ -211,7 +228,6 @@
       (keyword_on)
       ] @font-lock-keyword-face )
 
-
     :language lang
     :feature 'method
     :override t
@@ -222,8 +238,6 @@
                          (method_args))
       (oref_method (method_name (objectscript_identifier) @font-lock-function-call-face)
                    (method_args))])
-
-
     :language lang
     :feature 'delimiter
     :override t
@@ -232,26 +246,61 @@
 )
 
 
+
+(defun objectscript-ts-parent-has-braces-p (_node parent _bol &rest _)
+  "Return t if the PARENT node contains a '{' as a direct child."
+  (let ((found nil))
+    (when parent
+      ;; Loop through all immediate children of the parent
+      (dotimes (i (treesit-node-child-count parent))
+        (when (equal (treesit-node-type (treesit-node-child parent i)) "{")
+          (setq found t))))
+    found))
+
+(defun objectscript-ts-is-tag-line-p (node _parent _bol &rest _)
+  "Return t if the line is a tag, even if Emacs passes the parent statement node."
+  (let ((type (treesit-node-type node)))
+    (or
+     ;; Case 1: Emacs successfully passes the tag_statement
+     (equal type "tag_statement")
+     (equal type "tag")
+     ;; Case 2: Emacs passes the parent statement, so we check its first child
+     (and (equal type "statement")
+          (equal (treesit-node-type (treesit-node-child node 0)) "tag_statement")))))
+
 (defvar objectscript-ts-indent-rules
   '((objectscript_udl
      ;; Comments should indent to match their parent
-     ((node-is "line_comment_1") parent-bol 4)
      ;; Closing braces align with their opening construct
+     (objectscript-ts-is-tag-line-p (lambda (&rest _) (point-min)) 0)
      ((node-is "}") parent-bol 0)
      ;; Content inside class body should be indented
      ((parent-is "class_body") parent-bol 4)
      ;; Method definition content (fix typo: was "method_defintion")
      ((parent-is "method_definition") parent-bol 4)
+     (objectscript-ts-parent-has-braces-p parent-bol 4)
      ;; Class statements (like Parameter, Property, etc.) inside class_body
      ((node-is "class_statement") parent-bol 4)
+
+     ((node-is "write_argument") (nth-sibling 1) 0)
+     ((node-is "set_argument") (nth-sibling 1) 4)
+     ((node-is "do_parameter") (nth-sibling 1) 4)
+     ((node-is "kill_argument") (nth-sibling 1) 4)
+     ((node-is "command_lock_argument") (nth-sibling 1) 4)
+     ((node-is "read_argument") (nth-sibling 1) 4)
+     ((node-is "open_parameter") (nth-sibling 1) 4)
+     ((node-is "close_parameter") (nth-sibling 1) 4)
+     ((node-is "use_parameter") (nth-sibling 1) 4)
+
+
      ;; Top level constructs align with beginning of line
      ((parent-is "class_definition") parent-bol 0)
      ((parent-is "program") parent-bol 0)
      ;; Default fallback
+     ((node-is ".*") parent-bol 0)
      (no-node parent-bol 0))))
-)
 
-(defun objectscript-ts-setup ()
+(defun objectscript-ts-setup (parser-name)
   "Setup treesit for objectscript-ts-mode"
   
   (message "Starting objectscript-ts-setup...")
@@ -265,14 +314,22 @@
   
   ;; Set font-lock feature list
   (setq-local treesit-font-lock-feature-list
-              '((comment class keyword literal bracket variable method macro delimiter)))
+              '((comment class keyword literal bracket variable method macro delimiter routine)))
   (message "Set font-lock feature list: %s" treesit-font-lock-feature-list)
 
 
   (setq-local treesit-font-lock-settings
-              (append python--treesit-settings
-              (apply #'treesit-font-lock-rules objectscript-ts-font-lock-rules)))
+              (append
+               ;; 2. UDL-only specific rules
+               (when (eq parser-name 'objectscript_udl)
+                 (apply #'treesit-font-lock-rules objectscript-udl-ts-font-lock-rules))
 
+                (when (eq parser-name 'objectscript_routine)
+                 (apply #'treesit-font-lock-rules objectscript-routine-ts-font-lock-rules))
+
+               ;; 3. Shared rules generated for UDL
+               (objectscript-shared-ts-font-lock-rules parser-name)
+               ))
 
   (setq-local treesit--indent-verbose t)
 
@@ -287,21 +344,26 @@
 
 (define-derived-mode objectscript-ts-mode prog-mode "objectscript"
   "Major mode for editing ObjectScript, powered by tree-sitter"
-
+  (let ((parser-name (if (string-match-p "\\.cls\\'" buffer-file-name)
+                         'objectscript_udl
+                       'objectscript_routine)))
+    (message "Initializing ObjectScript mode with parser: %s" parser-name)
   (message "Checking treesitter availability...")
-  (message "objectscript_udl ready: %s" (treesit-ready-p 'objectscript_udl))
+  (message "objectscript ready: %s" (treesit-ready-p parser-name))
 
-  (if (treesit-ready-p 'objectscript_udl)
+  (if (treesit-ready-p parser-name)
       (progn
-        (message "Creating objectscript_udl parser...")
-        (treesit-parser-create 'objectscript_udl)
-        (treesit-parser-create 'python)
+        (message "Creating objectscript parser...")
+        (dolist (p (treesit-parser-list))
+                (treesit-parser-delete p))
+        (treesit-parser-create parser-name)
         (message "Running setup...")
-        (objectscript-ts-setup)
+        (objectscript-ts-setup parser-name)
         (message "Setup complete!"))
-    (message "objectscript_udl parser not available!")))
+    (message "objectscript_udl parser not available!"))))
 
 (if (treesit-ready-p 'objectscript_udl)
-    (add-to-list 'auto-mode-alist '("\\.cls\\'" . objectscript-ts-mode)))
+    (add-to-list 'auto-mode-alist '("\\.cls\\'" . objectscript-ts-mode))
+  (add-to-list 'auto-mode-alist '("\\.\\(mac\\|int\\|inc\\)\\'" . objectscript-ts-mode)))
 (provide 'objectscript-ts-mode)
 ;; objectscript-treesitter-major-mode ends here
