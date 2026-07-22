@@ -119,7 +119,25 @@
       ])
      )
 
-
+    :language objectscript_udl
+    :feature keyword
+    :override t
+    ([
+      (keyword_class)
+      (keyword_index)
+      (keyword_relationship)
+      (keyword_foreignkey)
+      (keyword_references)
+      (keyword_classmethod)
+      (keyword_property)
+      (keyword_parameter)
+      (keyword_method)
+      (keyword_query)
+      (keyword_xdata)
+      (keyword_storage)
+      (keyword_projection)
+      (keyword_extends)
+      (keyword_include)] @font-lock-keyword-face)
     )
   )
 
@@ -140,6 +158,8 @@
     :feature 'comment
     :override t
     '([(line_comment_1)
+       (line_comment_2)
+       (line_comment_3)
       (block_comment)]
      @font-lock-comment-face
      (documatic_line) @font-lock-doc-face)
@@ -200,35 +220,19 @@
       (keyword_return)
       (keyword_quit)
       (keyword_new)
-      (keyword_try)
+      (keyword_as)
+      (keyword_of)
+      (keyword_not)
       (keyword_catch)
       (keyword_throw)
       (keyword_break)
-      (keyword_merge)
-      (keyword_as)
-      (keyword_of)
-      (keyword_class)
-      (keyword_index)
-      (keyword_relationship)
-      (keyword_foreignkey)
-      (keyword_references)
-      (keyword_classmethod)
-      (keyword_property)
-      (keyword_parameter)
-      (keyword_method)
-      (keyword_query)
-      (keyword_xdata)
-      (keyword_storage)
-      (keyword_projection)
-      (keyword_extends)
-      (keyword_not)
       (keyword_byref)
+      (keyword_try)
       (keyword_list)
       (keyword_output)
-      (keyword_include)
       (keyword_on)
+      (keyword_merge)
       ] @font-lock-keyword-face )
-
     :language lang
     :feature 'method
     :override t
@@ -293,8 +297,6 @@
      ((node-is "open_parameter") (nth-sibling 1) 4)
      ((node-is "close_parameter") (nth-sibling 1) 4)
      ((node-is "use_parameter") (nth-sibling 1) 4)
-
-
      ;; Top level constructs align with beginning of line
      ((parent-is "class_definition") parent-bol 0)
      ((parent-is "program") parent-bol 0)
@@ -364,8 +366,10 @@
         (message "Setup complete!"))
     (message "objectscript_udl parser not available!"))))
 
-(if (treesit-ready-p 'objectscript_udl)
-    (add-to-list 'auto-mode-alist '("\\.cls\\'" . objectscript-ts-mode))
+(when (treesit-ready-p 'objectscript_udl)
+  (add-to-list 'auto-mode-alist '("\\.cls\\'" . objectscript-ts-mode)))
+
+(when (treesit-ready-p 'objectscript_routine)
   (add-to-list 'auto-mode-alist '("\\.\\(mac\\|int\\|inc\\)\\'" . objectscript-ts-mode)))
 (provide 'objectscript-ts-mode)
 ;; objectscript-treesitter-major-mode ends here
