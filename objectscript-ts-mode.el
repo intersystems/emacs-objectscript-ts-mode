@@ -6,7 +6,7 @@
 ;; Maintainer: Marc Johnson <marjohns@intersystems.com>
 ;; Created: May 03, 2024
 ;; Modified: August 04, 2025
-;; Version: 0.0.1
+;; Version: 0.0.5
 ;; Keywords:  languages lisp tools objectscript
 ;; Homepage: https://github.com/intersystems/emacs-objectscript-ts-mode.git
 ;; Package-Requires: ((emacs "29.1"))
@@ -28,7 +28,7 @@
 
 
 (defvar objectscript-ts-range-rules
- '(
+  '(
     ;; :embed python
     ;; :host objectscript_udl
     ;; ((method_definition
@@ -38,10 +38,7 @@
     ;;    (typename))
     ;;   ;; 2. If it is, capture the body content as @python
     ;;   (external_method_body_content) @python))
-)
-)
-
-
+))
 
 (defvar objectscript-routine-ts-font-lock-rules
 '(
@@ -137,7 +134,11 @@
       (keyword_storage)
       (keyword_projection)
       (keyword_extends)
-      (keyword_include)] @font-lock-keyword-face)
+      (keyword_include)
+      (keyword_output)
+      (keyword_not)
+      (keyword_byref)
+      (keyword_list)] @font-lock-keyword-face)
     )
   )
 
@@ -222,17 +223,14 @@
       (keyword_new)
       (keyword_as)
       (keyword_of)
-      (keyword_not)
       (keyword_catch)
       (keyword_throw)
       (keyword_break)
-      (keyword_byref)
       (keyword_try)
-      (keyword_list)
-      (keyword_output)
       (keyword_on)
       (keyword_merge)
       ] @font-lock-keyword-face )
+
     :language lang
     :feature 'method
     :override t
@@ -324,10 +322,10 @@
 
   (setq-local treesit-font-lock-settings
               (append
+               ;;python--treesit-settings
                ;; 2. UDL-only specific rules
                (when (eq parser-name 'objectscript_udl)
                  (apply #'treesit-font-lock-rules objectscript-udl-ts-font-lock-rules))
-
                 (when (eq parser-name 'objectscript_routine)
                  (apply #'treesit-font-lock-rules objectscript-routine-ts-font-lock-rules))
 
@@ -338,7 +336,7 @@
   (setq-local treesit--indent-verbose t)
 
   ;; (setq-local indent-line-function #'treesit-simple-indent-line)
-   (setq-local treesit-simple-indent-rules objectscript-ts-indent-rules)
+   (setq-local treesit-simple-indent-rules (append objectscript-ts-indent-rules))
 
 
   ;; Setup treesit mode
