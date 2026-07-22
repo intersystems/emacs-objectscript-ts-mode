@@ -1,6 +1,6 @@
 ;;; objectscript-treesitter-major-mode --- A major-mode for editing ObjectScript -*- lexical-binding: t; -*-
 ;;
-;; Copyright (C) 2024 Marc Johnson
+;; Copyright (C) 2026 InterSystems Corporation
 ;;
 ;; Author: Marc Johnson <marjohns@intersystems.com>
 ;; Maintainer: Marc Johnson <marjohns@intersystems.com>
@@ -163,7 +163,8 @@
     :feature 'variable
     :override t
     '([(gvn (identifier) @font-lock-variable-name-face)
-      (lvn (objectscript_identifier) @font-lock-variable-name-face)
+      (lvn [(objectscript_identifier) @font-lock-variable-name-face
+            (objectscript_identifier_special) @font-lock-preprocessor-face])
       (oref_property (property_name (objectscript_identifier)
                                     @font-lock-variable-name-face))
       (instance_variable (property_name (objectscript_identifier) @font-lock-variable-name-face))
@@ -236,7 +237,8 @@
                                        (objectscript_identifier) @font-lock-function-call-face])
 
                          (method_args))
-      (oref_method (method_name (objectscript_identifier) @font-lock-function-call-face)
+      (oref_method (method_name [(objectscript_identifier_special) @font-lock-function-call-face
+                                 (objectscript_identifier) @font-lock-function-call-face])
                    (method_args))])
     :language lang
     :feature 'delimiter
