@@ -43,7 +43,8 @@
                                    (objectscript_identifier_special) @font-lock-preprocessor-face])))))
 
 (defvar objectscript-ts-udl-font-lock-rules
-    '(  ;; === Class Definitions ===
+    '(
+    ;; === Class Definitions ===
     :language objectscript_udl
     :feature class
     :override t
@@ -237,7 +238,6 @@
   "Return t if the PARENT node contain a '{' as a direct child."
   (let ((found nil))
     (when parent
-      ;; Loop through all immediate children of the parent
       (dotimes (i (treesit-node-child-count parent))
         (when (equal (treesit-node-type (treesit-node-child parent i)) "{")
           (setq found t))))
@@ -262,7 +262,6 @@
      ((node-is "}") parent-bol 0)
      ;; Content inside class body should be indented
      ((parent-is "class_body") parent-bol 4)
-     ;; Method definition content (fix typo: was "method_defintion")
      ((parent-is "method_definition") parent-bol 4)
      (objectscript-ts-parent-has-braces-p parent-bol 4)
      ;; Class statements (like Parameter, Property, etc.) inside class_body
@@ -280,7 +279,6 @@
      ;; Top level constructs align with beginning of line
      ((parent-is "class_definition") parent-bol 0)
      ((parent-is "program") parent-bol 0)
-     ;; Default fallback
      ((node-is ".*") parent-bol 0)
      (no-node parent-bol 0))))
 
@@ -310,6 +308,7 @@ parser this file use (routine or udl)."
                ;; 2. UDL-only specific rules
                (when (eq parser-name 'objectscript_udl)
                  (apply #'treesit-font-lock-rules objectscript-ts-udl-font-lock-rules))
+               ;; 2.1 Routine specific rules
                 (when (eq parser-name 'objectscript_routine)
                  (apply #'treesit-font-lock-rules objectscript-ts-routine-font-lock-rules))
 
