@@ -6,7 +6,7 @@
 ;; Maintainer: Marc Johnson <marjohns@intersystems.com>
 ;; Created: May 03, 2024
 ;; Modified: August 04, 2025
-;; Version: 0.0.5
+;; Version: 0.0.6
 ;; Keywords:  languages lisp tools objectscript
 ;; Homepage: https://github.com/intersystems/emacs-objectscript-ts-mode.git
 ;; Package-Requires: ((emacs "29.1"))
@@ -26,36 +26,23 @@
 (require 'python)
 (require 'font-lock)
 
-
 (defvar objectscript-ts-range-rules
-  '(
-    ;; :embed python
-    ;; :host objectscript_udl
-    ;; ((method_definition
-    ;;   ;; 1. Check if the language keyword is Python (case-insensitive)
-    ;;   (method_keyword_external_language
-    ;;    "="
-    ;;    (typename))
-    ;;   ;; 2. If it is, capture the body content as @python
-    ;;   (external_method_body_content) @python))
-))
+ '())
 
-(defvar objectscript-routine-ts-font-lock-rules
+(defvar objectscript-ts-routine-font-lock-rules
 '(
-        :language objectscript_routine
-        :feature routine
-        :override t
-        ((routine_definition (routine) @font-lock-keyword-face (routine_name) @font-lock-type-face))
+  :language objectscript_routine
+  :feature routine
+  :override t
+  ((routine_definition (routine) @font-lock-keyword-face (routine_name) @font-lock-type-face))
 
-        :language objectscript_routine
-        :feature method
-        :override t
-        ((routine_tag_call (method_name [(objectscript_identifier) @font-lock-function-call-face
-                                         (objectscript_identifier_special) @font-lock-preprocessor-face])))
-)
-)
+  :language objectscript_routine
+  :feature method
+  :override t
+  ((routine_tag_call (method_name [(objectscript_identifier) @font-lock-function-call-face
+                                   (objectscript_identifier_special) @font-lock-preprocessor-face])))))
 
-(defvar objectscript-udl-ts-font-lock-rules
+(defvar objectscript-ts-udl-font-lock-rules
     '(  ;; === Class Definitions ===
     :language objectscript_udl
     :feature class
@@ -138,11 +125,10 @@
       (keyword_output)
       (keyword_not)
       (keyword_byref)
-      (keyword_list)] @font-lock-keyword-face)
-    )
-  )
+      (keyword_list)] @font-lock-keyword-face)))
 
-(defun objectscript-shared-ts-font-lock-rules (lang)
+(defun objectscript-ts-shared-font-lock-rules (lang)
+  "Define font-lock-rules for shared nodes between routine and udl using LANG."
   (treesit-font-lock-rules
     :language lang
     :feature 'macro
@@ -152,8 +138,7 @@
       (system_defined_variable) @font-lock-preprocessor-face
       (extrinsic_function (line_ref (objectscript_identifier) @font-lock-preprocessor-face
                                     (routine_ref (routine_name) @font-lock-variable-name-face)))
-      (tag_statement (tag) @font-lock-preprocessor-face)]
-     )
+      (tag_statement (tag) @font-lock-preprocessor-face)])
     ;; === Comments & Documentation ===
     :language lang
     :feature 'comment
@@ -190,8 +175,7 @@
                                     @font-lock-variable-name-face))
       (instance_variable (property_name (objectscript_identifier) @font-lock-variable-name-face))
       (class_name) @font-lock-type-face
-      (parameter_name (objectscript_identifier) @font-lock-property-use-face)
-      ])
+      (parameter_name (objectscript_identifier) @font-lock-property-use-face)])
 
     ;; === Brackets & Delimiters ===
     :language lang
@@ -245,14 +229,12 @@
     :language lang
     :feature 'delimiter
     :override t
-    '(["," "."] @font-lock-delimiter-face)
-    )
-)
+    '(["," "."] @font-lock-delimiter-face)))
 
 
 
 (defun objectscript-ts-parent-has-braces-p (_node parent _bol &rest _)
-  "Return t if the PARENT node contains a '{' as a direct child."
+  "Return t if the PARENT node contain a '{' as a direct child."
   (let ((found nil))
     (when parent
       ;; Loop through all immediate children of the parent
@@ -262,7 +244,7 @@
     found))
 
 (defun objectscript-ts-is-tag-line-p (node _parent _bol &rest _)
-  "Return t if the line is a tag, even if Emacs passes the parent statement node."
+  "Return t if the line is a tag, even if Emacs passes the parent statement NODE."
   (let ((type (treesit-node-type node)))
     (or
      ;; Case 1: Emacs successfully passes the tag_statement
@@ -303,7 +285,9 @@
      (no-node parent-bol 0))))
 
 (defun objectscript-ts-setup (parser-name)
-  "Setup treesit for objectscript-ts-mode"
+  "Setup treesit for objectscript-ts-mode.
+\n PARSER-NAME is the name of the objectscript
+parser this file use (routine or udl)."
   
   (message "Starting objectscript-ts-setup...")
   
@@ -325,13 +309,12 @@
                ;;python--treesit-settings
                ;; 2. UDL-only specific rules
                (when (eq parser-name 'objectscript_udl)
-                 (apply #'treesit-font-lock-rules objectscript-udl-ts-font-lock-rules))
+                 (apply #'treesit-font-lock-rules objectscript-ts-udl-font-lock-rules))
                 (when (eq parser-name 'objectscript_routine)
-                 (apply #'treesit-font-lock-rules objectscript-routine-ts-font-lock-rules))
+                 (apply #'treesit-font-lock-rules objectscript-ts-routine-font-lock-rules))
 
                ;; 3. Shared rules generated for UDL
-               (objectscript-shared-ts-font-lock-rules parser-name)
-               ))
+               (objectscript-ts-shared-font-lock-rules parser-name)))
 
   (setq-local treesit--indent-verbose t)
 
@@ -340,12 +323,11 @@
 
 
   ;; Setup treesit mode
-  (treesit-major-mode-setup)
-  )
+  (treesit-major-mode-setup))
 
 
 (define-derived-mode objectscript-ts-mode prog-mode "objectscript"
-  "Major mode for editing ObjectScript, powered by tree-sitter"
+  "Major mode for editing ObjectScript, powered by tree-sitter."
   (let ((parser-name (if (string-match-p "\\.cls\\'" buffer-file-name)
                          'objectscript_udl
                        'objectscript_routine)))
@@ -370,4 +352,4 @@
 (when (treesit-ready-p 'objectscript_routine)
   (add-to-list 'auto-mode-alist '("\\.\\(mac\\|int\\|inc\\)\\'" . objectscript-ts-mode)))
 (provide 'objectscript-ts-mode)
-;; objectscript-treesitter-major-mode ends here
+;;; objectscript-ts-mode.el ends here
