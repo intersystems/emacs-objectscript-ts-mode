@@ -283,7 +283,7 @@
      (no-node parent-bol 0))))
 
 (defun objectscript-ts-setup (parser-name)
-  "Setup treesit for objectscript-ts-mode.
+  "Setup treesit for \"objectscript-ts-mode\".
 \n PARSER-NAME is the name of the objectscript
 parser this file use (routine or udl)."
   
